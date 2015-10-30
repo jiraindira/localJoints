@@ -1,0 +1,32 @@
+<md-dialog aria-label="Mango (Fruit)">
+    <md-content class="md-padding">
+     <div>
+         <h5 class="reduceMargin">Cost</h5>
+         <div layout="row" layout-wrap>
+             <div ng-repeat="item in prices">
+                 <md-checkbox ng-checked="exists(item.price, selected)" ng-click="toggle(item.price, selected)">
+                     {{ item.price }}
+                 </md-checkbox>
+             </div>
+         </div>
+     </div>
+
+    <div>
+        <h5 class="reduceMargin">Cities</h5>
+        <div layout="row" layout-wrap>
+            <div ng-repeat="city in cities">
+                <md-checkbox ng-checked="exists(city, selected)" ng-click="toggle(city, selected)">
+                    {{ city }}
+                </md-checkbox>
+            </div>
+        </div>
+    </div>
+
+    </md-content>
+    <div class="md-actions" layout="row">
+        <span flex></span>
+        <md-button ng-click="answer('not useful')"> Cancel </md-button>
+        <md-button ng-click="answer('useful')" class="md-primary"> Save </md-button>
+    </div>
+</md-dialog>
+

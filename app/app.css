@@ -1,0 +1,60 @@
+/* app css stylesheet */
+
+.menu {
+  list-style: none;
+  border-bottom: 0.5em solid black;
+  margin-bottom: 2em;
+  padding: 0 0 0.1em;
+}
+
+.menu:before {
+  content: "[";
+}
+
+.menu:after {
+  content: "]";
+}
+
+.menu > li {
+  display: inline;
+}
+
+.menu > li:before {
+  content: "|";
+  padding-right: 0.3em;
+}
+
+.menu > li:nth-child(1):before {
+  content: "";
+  padding: 0;
+}
+
+.md-toolbar-tools h1 {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: inherit;
+}
+
+
+.md-button.md-icon-button.lj-search-button {
+  margin:0;
+  width: 40px;
+}
+
+.md-button.md-icon-button.lj-filter-button {
+  margin:0;
+  width: 40px;
+}
+
+.reduceMargin{
+  -webkit-margin-before: 0.5em;
+  -webkit-margin-after: 0.5em;
+}
+
+.observationFont {
+  font-size : 14px;
+}
+
+.emphasizeBold {
+  font-weight: bold;
+}
