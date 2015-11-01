@@ -13,12 +13,12 @@
             </div>
 
             <md-autocomplete
-                             md-selected-item="vm.selectedItem"
-                             md-search-text="vm.searchText"
-                             md-items="item in vm.querySearch(vm.searchText)"
-                             md-item-text="item.name"
-                             md-min-length="4"
-                             md-floating-label="Restaurant Name">
+                    md-selected-item="vm.selectedItem"
+                    md-search-text="vm.searchText"
+                    md-items="item in vm.querySearch(vm.searchText)"
+                    md-item-text="item.name"
+                    md-min-length="4"
+                    md-floating-label="Restaurant Name">
                 <md-item-template>
                     <span md-highlight-text="ctrl.searchText" md-highlight-flags="^i">{{item.name}} ({{item.location.crossStreet}})</span>
                 </md-item-template>

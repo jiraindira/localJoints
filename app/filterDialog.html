@@ -22,6 +22,17 @@
         </div>
     </div>
 
+    <div>
+        <h5 class="reduceMargin">Reviewer</h5>
+        <div layout="row" layout-wrap>
+            <div ng-repeat="reviewer in reviewers">
+                <md-checkbox ng-checked="exists(reviewer, selected)" ng-click="toggle(reviewer, selected)">
+                    {{ reviewer }}
+                </md-checkbox>
+            </div>
+        </div>
+    </div>
+
     </md-content>
     <div class="md-actions" layout="row">
         <span flex></span>

@@ -142,7 +142,7 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 
     placesExplorerService.get({ near: $scope.restaurantData.location, query: query , limit: 4 },function(result){
       defered.resolve(result.response.minivenues);
-      //console.log(result.response.minivenues)
+      console.log(result.response)
     });
     return defered.promise;
   }
@@ -236,7 +236,9 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
         fbReviews = new Firebase(reviewsUrl);
         fbReviews.push(payloadReviewer);
 
-      }
+      };
+
+      /////////////
     });
 
   };
@@ -308,7 +310,7 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
 
     if (!restaurants.length) return;
 
-    // Attach list of selected observations to each review)
+    // Retrieve list of locations
     var locations = [];
     restaurants.forEach(function (restaurant) {
       var temp = restaurant.location;
@@ -317,6 +319,21 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
       }
     });
     $scope.cities = locations;
+
+    // Retrieve list of reviewers
+    var users = [];
+    var tempReviews = [];
+    restaurants.forEach(function (restaurant) {
+      var tempReviews = getArrayFromObject(restaurant.reviews);
+      tempReviews.forEach(function(tempReview) {
+        var temp = tempReview.reviewer;
+        if (notInArray(temp,users)){
+          users.push(temp);
+        }
+      })
+
+    });
+    $scope.reviewers = users;
   });
 
   function notInArray(value, array) {
@@ -333,10 +350,14 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
     return array;
   }
 
+  $scope.selected = [];
   $scope.toggle = function (item, list) {
     var idx = list.indexOf(item);
     if (idx > -1) list.splice(idx, 1);
     else list.push(item);
+  };
+  $scope.exists = function (item, list) {
+    return list.indexOf(item) > -1;
   };
 };
 
