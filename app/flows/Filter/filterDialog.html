@@ -4,7 +4,7 @@
          <h5 class="reduceMargin">Cost</h5>
          <div layout="row" layout-wrap>
              <div ng-repeat="item in prices">
-                 <md-checkbox ng-checked="exists(item.price, selected)" ng-click="toggle(item.price, selected)">
+                 <md-checkbox ng-checked="exists(item.price, selectedPrice)" ng-click="toggle(item.price, selectedPrice)">
                      {{ item.price }}
                  </md-checkbox>
              </div>
@@ -15,7 +15,7 @@
         <h5 class="reduceMargin">Cities</h5>
         <div layout="row" layout-wrap>
             <div ng-repeat="city in cities">
-                <md-checkbox ng-checked="exists(city, selected)" ng-click="toggle(city, selected)">
+                <md-checkbox ng-checked="exists(city, selectedCity)" ng-click="toggle(city, selectedCity)">
                     {{ city }}
                 </md-checkbox>
             </div>
@@ -26,7 +26,7 @@
         <h5 class="reduceMargin">Reviewer</h5>
         <div layout="row" layout-wrap>
             <div ng-repeat="reviewer in reviewers">
-                <md-checkbox ng-checked="exists(reviewer, selected)" ng-click="toggle(reviewer, selected)">
+                <md-checkbox ng-checked="exists(reviewer, selectedReviewer)" ng-click="toggle(reviewer, selectedReviewer)">
                     {{ reviewer }}
                 </md-checkbox>
             </div>
@@ -36,8 +36,8 @@
     </md-content>
     <div class="md-actions" layout="row">
         <span flex></span>
-        <md-button ng-click="answer('not useful')"> Cancel </md-button>
-        <md-button ng-click="answer('useful')" class="md-primary"> Save </md-button>
+        <md-button ng-click="hide()"> Cancel </md-button>
+        <md-button ng-click="applyFilter()" class="md-primary"> Save </md-button>
     </div>
 </md-dialog>
 

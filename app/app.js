@@ -42,7 +42,7 @@ app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBo
     $mdDialog.show({
       controller: AddDialogController,
       controllerAs: "vm",
-      templateUrl: 'addDialog.html',
+      templateUrl: 'flows/Add/addDialog.html',
       parent: angular.element(document.body),
       targetEvent: ev,
       clickOutsideToClose:true
@@ -53,7 +53,7 @@ app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBo
     $mdDialog.show({
       controller: FilterDialogController,
       controllerAs: "vm1",
-      templateUrl: 'filterDialog.html',
+      templateUrl: 'flows/Filter/filterDialog.html',
       parent: angular.element(document.body),
       targetEvent: ev,
       clickOutsideToClose:true
@@ -149,7 +149,7 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 
   // we will store all of the restaurant specific data here
   $scope.restaurantData = {};
- // we will store all of the reviewer's specific data here
+  // we will store all of the reviewer's specific data here
   $scope.reviewerData = {};
 
   $scope.restaurantData = {
@@ -248,7 +248,7 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
     for (var i in userObservation){
       masterObservation.observations[userObservation[i]] = true;
       console.log(masterObservation.observations[userObservation[i]])
-      }
+    }
     return masterObservation;
   }
 
@@ -271,6 +271,10 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
   self.hide = hide;
   self.cancel = cancel;
   self.answer = answer;
+
+  $scope.selectedPrice = [];
+  $scope.selectedCity = [];
+  $scope.selectedReviewer = [];
 
   //</editor-fold>
   function hide() {
@@ -308,6 +312,8 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
     var data = dataSnapshot.val();
     var restaurants = getArrayFromObject(data);
 
+    $scope.RestaurantData = restaurants;
+
     if (!restaurants.length) return;
 
     // Retrieve list of locations
@@ -340,6 +346,10 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
     return array.indexOf(value) == -1;
   }
 
+  function InArray(value, array) {
+    return array.indexOf(value) > -1;
+  }
+
   function getArrayFromObject(object) {
     var array = [];
     for (var key in object) {
@@ -350,16 +360,57 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
     return array;
   }
 
-  $scope.selected = [];
   $scope.toggle = function (item, list) {
     var idx = list.indexOf(item);
     if (idx > -1) list.splice(idx, 1);
     else list.push(item);
   };
+
   $scope.exists = function (item, list) {
     return list.indexOf(item) > -1;
   };
-};
+
+  $scope.applyFilter = function() {
+    var reviewers = $scope.selectedReviewer;
+    var selectedCities = $scope.selectedCity;
+    var data = getArrayFromObject($scope.RestaurantData);
+
+    if(reviewers.length>0){
+      //apply reviewer filter on data
+      data = filterReviewer(data,reviewers);
+    } ;
+    if(selectedCities.length>0){
+      //apply reviewer filter on data
+      data = filterBasic(data,selectedCities);
+    } ;
+  };
+
+  function filterReviewer(arrRestaurants,arrReviewers ) {
+    var arrPlaces = [];
+
+    arrRestaurants.forEach(function (arrRestaurant) {
+      var tempReviews = getArrayFromObject(arrRestaurant.reviews);
+      tempReviews.forEach(function(tempReview) {
+        var temp = tempReview.reviewer;
+        if (InArray(temp,arrReviewers)){
+          arrPlaces.push(arrRestaurant);
+        }
+      })
+    });
+  return arrPlaces;
+  }
+
+  function filterBasic(arrRestaurants,arrFilterList ) {
+    var arrPlaces = [];
+
+    arrRestaurants.forEach(function (arrRestaurant) {
+        var temp = arrRestaurant.location;
+        if (InArray(temp,arrFilterList)){
+          arrPlaces.push(arrRestaurant);
+        }
+      });
+    return arrPlaces;
+  }}
 
 app.directive('userAvatar', function() {
   return {
@@ -392,4 +443,5 @@ app.config(function($mdThemingProvider) {
     return array.join(', ');
   };
 });
+
 
