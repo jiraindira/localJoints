@@ -1,6 +1,10 @@
 var app = angular.module('StarterApp', ['ngMaterial', 'ngMdIcons', 'myService', 'firebase']);
 
 app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBottomSheet','$mdSidenav', '$mdDialog', function($scope, placesExplorerService, $firebase, $mdBottomSheet, $mdSidenav, $mdDialog){
+
+  $scope.accessLevel = 2;
+  $scope.menu2 = [{name:'#1',minAccess:1},{name:'#2',minAccess:2},{name:'#3',minAccess:1},{name:'#4',minAccess:1}];
+
   $scope.toggleSidenav = function(menuId) {
     $mdSidenav(menuId).toggle();
   };
@@ -99,20 +103,6 @@ app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBo
   });
 
 }]);
-
-app.controller('ListBottomSheetCtrl', function($scope, $mdBottomSheet) {
-  $scope.items = [
-    { name: 'Share', icon: 'share' },
-    { name: 'Upload', icon: 'upload' },
-    { name: 'Copy', icon: 'copy' },
-    { name: 'Print this page', icon: 'print' },
-  ];
-
-  $scope.listItemClick = function($index) {
-    var clickedItem = $scope.items[$index];
-    $mdBottomSheet.hide(clickedItem);
-  };
-});
 
 function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Firebase ) {
   var self = this;
@@ -266,27 +256,10 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 };
 
 function FilterDialogController($scope, $mdDialog, Firebase ) {
-  var self = this;
-
-  self.hide = hide;
-  self.cancel = cancel;
-  self.answer = answer;
 
   $scope.selectedPrice = [];
   $scope.selectedCity = [];
   $scope.selectedReviewer = [];
-
-  //</editor-fold>
-  function hide() {
-    $mdDialog.hide();
-  };
-  function cancel() {
-    $mdDialog.cancel();
-  };
-  function answer(answer) {
-    $mdDialog.hide(answer);
-  };
-
   $scope.prices = [
     {
       price: '$'
@@ -303,15 +276,12 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
   ];
 
   var firebaseObj = new Firebase('https://dazzling-heat-4525.firebaseio.com//restaurant');
-  //ref.orderByKey().startAt("b").endAt("b~").on("child_added", function(snapshot) {
-  //    console.log(snapshot.key());
-  //});
   firebaseObj.once('value', function(dataSnapshot) {
-
     //GET DATA
     var data = dataSnapshot.val();
     var restaurants = getArrayFromObject(data);
 
+    // store data in a $scope
     $scope.RestaurantData = restaurants;
 
     if (!restaurants.length) return;
@@ -337,17 +307,12 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
           users.push(temp);
         }
       })
-
     });
     $scope.reviewers = users;
   });
 
   function notInArray(value, array) {
     return array.indexOf(value) == -1;
-  }
-
-  function InArray(value, array) {
-    return array.indexOf(value) > -1;
   }
 
   function getArrayFromObject(object) {
@@ -370,47 +335,48 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
     return list.indexOf(item) > -1;
   };
 
-  $scope.applyFilter = function() {
-    var reviewers = $scope.selectedReviewer;
-    var selectedCities = $scope.selectedCity;
-    var data = getArrayFromObject($scope.RestaurantData);
-
-    if(reviewers.length>0){
-      //apply reviewer filter on data
-      data = filterReviewer(data,reviewers);
-    } ;
-    if(selectedCities.length>0){
-      //apply reviewer filter on data
-      data = filterBasic(data,selectedCities);
-    } ;
-  };
-
-  function filterReviewer(arrRestaurants,arrReviewers ) {
-    var arrPlaces = [];
-
-    arrRestaurants.forEach(function (arrRestaurant) {
-      var tempReviews = getArrayFromObject(arrRestaurant.reviews);
-      tempReviews.forEach(function(tempReview) {
-        var temp = tempReview.reviewer;
-        if (InArray(temp,arrReviewers)){
-          arrPlaces.push(arrRestaurant);
-        }
-      })
-    });
-  return arrPlaces;
-  }
-
-  function filterBasic(arrRestaurants,arrFilterList ) {
-    var arrPlaces = [];
-
-    arrRestaurants.forEach(function (arrRestaurant) {
-        var temp = arrRestaurant.location;
-        if (InArray(temp,arrFilterList)){
-          arrPlaces.push(arrRestaurant);
-        }
-      });
-    return arrPlaces;
-  }}
+  //$scope.applyFilter = function() {
+  //  var reviewers = $scope.selectedReviewer;
+  //  var selectedCities = $scope.selectedCity;
+  //  var data = getArrayFromObject($scope.RestaurantData);
+  //
+  //  if(reviewers.length>0){
+  //    //apply reviewer filter on data
+  //    data = filterReviewer(data,reviewers);
+  //  } ;
+  //  if(selectedCities.length>0){
+  //    //apply reviewer filter on data
+  //    data = filterBasic(data,selectedCities);
+  //  } ;
+  //};
+  //
+  //function filterReviewer(arrRestaurants,arrReviewers ) {
+  //  var arrPlaces = [];
+  //
+  //  arrRestaurants.forEach(function (arrRestaurant) {
+  //    var tempReviews = getArrayFromObject(arrRestaurant.reviews);
+  //    tempReviews.forEach(function(tempReview) {
+  //      var temp = tempReview.reviewer;
+  //      if (InArray(temp,arrReviewers)){
+  //        arrPlaces.push(arrRestaurant);
+  //      }
+  //    })
+  //  });
+  //return arrPlaces;
+  //}
+  //
+  //function filterBasic(arrRestaurants,arrFilterList ) {
+  //  var arrPlaces = [];
+  //
+  //  arrRestaurants.forEach(function (arrRestaurant) {
+  //      var temp = arrRestaurant.location;
+  //      if (InArray(temp,arrFilterList)){
+  //        arrPlaces.push(arrRestaurant);
+  //      }
+  //    });
+  //  return arrPlaces;
+  //}
+}
 
 app.directive('userAvatar', function() {
   return {
@@ -434,6 +400,73 @@ app.config(function($mdThemingProvider) {
       .accentPalette('pink');
   $mdThemingProvider.theme('input', 'default')
       .primaryPalette('grey')
+});
+
+app.filter('myFilter',function(){
+  return function(input){
+    //var reviewers = $scope.selectedReviewer;
+    //var selectedCities = $scope.selectedCity;
+
+    var reviewers = ["Jirain","Natalia"];
+    var selectedCities = ["Edinburg"];
+
+    //save the input in a temp output
+    var tempOutput = getArrayFromObject(input);
+
+    if(reviewers.length>0){
+      //apply reviewer filter on data
+      tempOutput = filterReviewer(tempOutput,reviewers);
+    }
+
+    if(selectedCities.length>0){
+      //apply reviewer filter on data
+      tempOutput = filterBasic(tempOutput,selectedCities);
+    }
+
+    function getArrayFromObject(object) {
+      var array = [];
+      for (var key in object) {
+        var item = object[key];
+        item.id = key;
+        array.push(item);
+      }
+      return array;
+    }
+
+    function filterReviewer(arrRestaurants,arrReviewers ) {
+      var arrPlaces = [];
+
+      arrRestaurants.forEach(function (arrRestaurant) {
+        var tempReviews = getArrayFromObject(arrRestaurant.reviews);
+        tempReviews.forEach(function(tempReview) {
+          var temp = tempReview.reviewer;
+          if (InArray(temp,arrReviewers)){
+            arrPlaces.push(arrRestaurant);
+          }
+        })
+      });
+      return arrPlaces;
+    }
+
+    function filterBasic(arrRestaurants,arrFilterList ) {
+      var arrPlaces = [];
+
+      arrRestaurants.forEach(function (arrRestaurant) {
+        var temp = arrRestaurant.location;
+        if (InArray(temp,arrFilterList)){
+          arrPlaces.push(arrRestaurant);
+        }
+      });
+      return arrPlaces;
+    }
+
+    function InArray(value, array) {
+      return array.indexOf(value) > -1;
+    }
+
+    var output = tempOutput;
+    return output;
+  }
 })
 
 .filter('list', function () {

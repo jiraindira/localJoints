@@ -8,6 +8,7 @@
 </head>
 
 <body layout="row" ng-controller="AppCtrl">
+
 <md-sidenav layout="column" class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
   <md-toolbar class="md-tall md-hue-2">
     <span flex></span>
@@ -96,7 +97,7 @@
           <md-card flex-gt-sm="90" flex-gt-md="80">
             <md-card-content>
               <md-list>
-                <md-item ng-repeat="restaurant in restaurants | filter:search">
+                <md-item ng-repeat="restaurant in restaurants | myFilter">
                   <md-item-content>
                     <div class="md-tile-left inset" hide-sm>
                       <user-avatar></user-avatar>
