@@ -1,6 +1,12 @@
 var app = angular.module('StarterApp', ['ngMaterial', 'ngMdIcons', 'myService', 'firebase']);
 
-app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBottomSheet','$mdSidenav', '$mdDialog', function($scope, placesExplorerService, $firebase, $mdBottomSheet, $mdSidenav, $mdDialog){
+app.run(function ($rootScope) {
+  $rootScope.$on('scope.stored', function (event, data) {
+    console.log("scope.stored", data);
+  });
+});
+
+app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBottomSheet','$mdSidenav', '$mdDialog', function($scope, placesExplorerService, $firebase, $mdBottomSheet, $mdSidenav, $mdDialog, Scopes){
 
   $scope.accessLevel = 2;
   $scope.menu2 = [{name:'#1',minAccess:1},{name:'#2',minAccess:2},{name:'#3',minAccess:1},{name:'#4',minAccess:1}];
@@ -255,7 +261,9 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 
 };
 
-function FilterDialogController($scope, $mdDialog, Firebase ) {
+function FilterDialogController($scope, $mdDialog, Firebase, Scopes ) {
+
+  Scopes.store('FilterDialogController', $scope);
 
   $scope.selectedPrice = [];
   $scope.selectedCity = [];
@@ -309,6 +317,7 @@ function FilterDialogController($scope, $mdDialog, Firebase ) {
       })
     });
     $scope.reviewers = users;
+
   });
 
   function notInArray(value, array) {
@@ -402,13 +411,18 @@ app.config(function($mdThemingProvider) {
       .primaryPalette('grey')
 });
 
-app.filter('myFilter',function(){
+app.filter('myFilter',function(Scopes){
   return function(input){
-    //var reviewers = $scope.selectedReviewer;
+    if (angular.isUndefined(input)) return;
+
+    var reviewers = Scopes.get("FilterDialogController").selectedReviewer;
+    //console.log(reviewers);
     //var selectedCities = $scope.selectedCity;
 
-    var reviewers = ["Jirain","Natalia"];
-    var selectedCities = ["Edinburg"];
+
+
+   // var reviewers = ["Jirain","Dahlia Bock"];
+    var selectedCities = ["New York"];
 
     //save the input in a temp output
     var tempOutput = getArrayFromObject(input);
@@ -464,8 +478,7 @@ app.filter('myFilter',function(){
       return array.indexOf(value) > -1;
     }
 
-    var output = tempOutput;
-    return output;
+    return tempOutput;
   }
 })
 
@@ -477,4 +490,16 @@ app.filter('myFilter',function(){
   };
 });
 
+app.factory('Scopes', function ($rootScope) {
+  var mem = {};
 
+  return {
+    store: function (key, value) {
+      $rootScope.$emit('scope.stored', key);
+      mem[key] = value;
+    },
+    get: function (key) {
+      return mem[key];
+    }
+  };
+});
