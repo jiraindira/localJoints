@@ -111,10 +111,10 @@ app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBo
 }]);
 
 function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Firebase ) {
-  var self = this;
+  var vm = this;
 
   self.hide = hide;
-  self.cancel = cancel;
+    vm.cancel = cancel;
   self.answer = answer;
   self.querySearch = querySearch;
 
@@ -236,7 +236,8 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 
       /////////////
     });
-
+      //close dialog box when done
+      $mdDialog.cancel();
   };
 
   //consolidate observations into a master list
@@ -263,143 +264,115 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 
 function FilterDialogController($scope, $mdDialog, Firebase, Scopes, filterService ) {
 
-  Scopes.store('FilterDialogController', $scope);
+    Scopes.store('FilterDialogController', $scope);
 
-  $scope.filterService = filterService;
-  $scope.selectedPrice = [];
-  $scope.selectedCity = [];
-  $scope.selectedReviewer = [];
-  $scope.prices = [
-    {
-      price: '$'
-    },
-    {
-      price: '$$'
-    },
-    {
-      price: '$$$'
-    },
-    {
-      price: '$$$$'
-    }
-  ];
+    var vm1 = this;
 
-  if (!filterService.allReviewers.length) {
-
-
-    var firebaseObj = new Firebase('https://dazzling-heat-4525.firebaseio.com//restaurant');
-    firebaseObj.once('value', function (dataSnapshot) {
-      //GET DATA
-      var data = dataSnapshot.val();
-      var restaurants = getArrayFromObject(data);
-
-      // store data in a $scope
-      $scope.RestaurantData = restaurants;
-
-      if (!restaurants.length) return;
-
-      // Retrieve list of locations
-      var locations = [];
-      restaurants.forEach(function (restaurant) {
-        var temp = restaurant.location;
-        if (notInArray(temp, locations)) {
-          locations.push(temp);
+    $scope.filterService = filterService;
+    $scope.selectedPrice = [];
+    $scope.selectedCity = [];
+    $scope.selectedReviewer = [];
+    $scope.prices = [
+        {
+            price: '$'
+        },
+        {
+          price: '$$'
+        },
+        {
+          price: '$$$'
+        },
+        {
+          price: '$$$$'
         }
-      });
-      $scope.cities = locations;
+    ];
 
-      // Retrieve list of reviewers
-      //var users = [];
-      //var tempReviews = [];
+    //methods
+    vm1.cancel = cancel;
 
-      var allReviewers = [];
-      restaurants.forEach(function (restaurant) {
-        var reviews = getArrayFromObject(restaurant.reviews);
-        reviews.forEach(function (review) {
-          allReviewers.push(review.reviewer);
-          //if (notInArray(temp,users)){
-          //  users.push(temp);
-          //}
+    if (!filterService.allReviewers.length) {
+        var firebaseObj = new Firebase('https://dazzling-heat-4525.firebaseio.com//restaurant');
+        firebaseObj.once('value', function (dataSnapshot) {
+          //GET DATA
+          var data = dataSnapshot.val();
+          var restaurants = getArrayFromObject(data);
+
+          // store data in a $scope
+          $scope.RestaurantData = restaurants;
+
+          if (!restaurants.length) return;
+
+          //// Retrieve list of locations
+          //var locations = [];
+          //restaurants.forEach(function (restaurant) {
+          //  var temp = restaurant.location;
+          //  if (notInArray(temp, locations)) {
+          //    locations.push(temp);
+          //  }
+          //});
+          //$scope.cities = locations;
+
+            // Retrieve all cities
+            var allCities = [];
+            restaurants.forEach(function(restaurant){
+                allCities.push(restaurant.location);
+            });
+
+            allCities = _.unique(allCities).map(function (city) {
+                return {
+                    name: city
+                }
+            });
+            filterService.allCities = allCities;
+
+            //Retrieve all reviewers
+            var allReviewers = [];
+            restaurants.forEach(function (restaurant) {
+                var reviews = getArrayFromObject(restaurant.reviews);
+                reviews.forEach(function (review) {
+                    allReviewers.push(review.reviewer);
+                });
+            });
+
+            allReviewers = _.unique(allReviewers).map(function (reviewer) {
+                return {
+                    name: reviewer
+                }
+            });
+
+            filterService.allReviewers = allReviewers;
+            //$scope.reviewers = users;
+
         });
-      });
-
-      allReviewers = _.unique(allReviewers).map(function (reviewer) {
-        return {
-          name: reviewer
-        }
-      });
-
-      filterService.allReviewers = allReviewers;
-      //$scope.reviewers = users;
-
-    });
-  }
-
-  function notInArray(value, array) {
-    return array.indexOf(value) == -1;
-  }
-
-  function getArrayFromObject(object) {
-    var array = [];
-    for (var key in object) {
-      var item = object[key];
-      item.id = key;
-      array.push(item);
     }
-    return array;
-  }
 
-  $scope.toggle = function (item, list) {
-    var idx = list.indexOf(item);
-    if (idx > -1) list.splice(idx, 1);
-    else list.push(item);
-  };
+    function cancel(){
+        $mdDialog.cancel();
+    }
 
-  $scope.exists = function (item, list) {
-    return list.indexOf(item) > -1;
-  };
+      function notInArray(value, array) {
+        return array.indexOf(value) == -1;
+      }
 
-  //$scope.applyFilter = function() {
-  //  var reviewers = $scope.selectedReviewer;
-  //  var selectedCities = $scope.selectedCity;
-  //  var data = getArrayFromObject($scope.RestaurantData);
-  //
-  //  if(reviewers.length>0){
-  //    //apply reviewer filter on data
-  //    data = filterReviewer(data,reviewers);
-  //  } ;
-  //  if(selectedCities.length>0){
-  //    //apply reviewer filter on data
-  //    data = filterBasic(data,selectedCities);
-  //  } ;
-  //};
-  //
-  //function filterReviewer(arrRestaurants,arrReviewers ) {
-  //  var arrPlaces = [];
-  //
-  //  arrRestaurants.forEach(function (arrRestaurant) {
-  //    var tempReviews = getArrayFromObject(arrRestaurant.reviews);
-  //    tempReviews.forEach(function(tempReview) {
-  //      var temp = tempReview.reviewer;
-  //      if (InArray(temp,arrReviewers)){
-  //        arrPlaces.push(arrRestaurant);
-  //      }
-  //    })
-  //  });
-  //return arrPlaces;
-  //}
-  //
-  //function filterBasic(arrRestaurants,arrFilterList ) {
-  //  var arrPlaces = [];
-  //
-  //  arrRestaurants.forEach(function (arrRestaurant) {
-  //      var temp = arrRestaurant.location;
-  //      if (InArray(temp,arrFilterList)){
-  //        arrPlaces.push(arrRestaurant);
-  //      }
-  //    });
-  //  return arrPlaces;
-  //}
+      function getArrayFromObject(object) {
+        var array = [];
+        for (var key in object) {
+          var item = object[key];
+          item.id = key;
+          array.push(item);
+        }
+        return array;
+      }
+
+      $scope.toggle = function (item, list) {
+        var idx = list.indexOf(item);
+        if (idx > -1) list.splice(idx, 1);
+        else list.push(item);
+      };
+
+      $scope.exists = function (item, list) {
+        return list.indexOf(item) > -1;
+      };
 }
 
 app.directive('userAvatar', function() {
@@ -431,20 +404,11 @@ app.filter('myFilter',function(Scopes,filterService){
     //if (angular.isUndefined(input)) return;
     if (!angular.isArray(input)) return;
     var reviewers = filterService.getSelectedReviewers();
-
-    //var data = Scopes.get("FilterDialogController")
-
-    //if (!data) return;
-
-    //var reviewers = data.selectedReviewer;
-
-    //filterService.getSelectedReviewers
-    //console.log(reviewers);
-    //var selectedCities = $scope.selectedCity;
+    var cities = filterService.getSelectedCities();
 
 
    // var reviewers = ["Jirain","Dahlia Bock"];
-    var selectedCities = ["New York"];
+   // var selectedCities = ["New York"];
 
     //save the input in a temp output
     var tempOutput = getArrayFromObject(input);
@@ -455,9 +419,9 @@ app.filter('myFilter',function(Scopes,filterService){
       tempOutput = filterReviewer(tempOutput,reviewers);
     }
 
-    if(selectedCities.length>0){
+    if(cities.length>0){
       //apply reviewer filter on data
-      tempOutput = filterBasic(tempOutput,selectedCities);
+      tempOutput = filterCity(tempOutput,cities);
     }
 
     function getArrayFromObject(object) {
@@ -481,21 +445,13 @@ app.filter('myFilter',function(Scopes,filterService){
       });
     }
 
-    function filterBasic(arrRestaurants,arrFilterList ) {
-      var arrPlaces = [];
-
-      arrRestaurants.forEach(function (arrRestaurant) {
-        var temp = arrRestaurant.location;
-        if (InArray(temp,arrFilterList)){
-          arrPlaces.push(arrRestaurant);
-        }
-      });
-      return arrPlaces;
-    }
-
-    function InArray(value, array) {
-      return array.indexOf(value) > -1;
-    }
+      function filterCity(allRestaurants, selectedCities){
+          // get restaurants that matches a selected cities
+          return allRestaurants.filter(function (restaurant){
+              //return true
+              return _.find(selectedCities, {name: restaurant.location});
+          })
+      }
 
     return tempOutput;
   }
@@ -524,15 +480,24 @@ app.factory('Scopes', function ($rootScope) {
 });
 
 app.service('filterService',function(){
-  var self = this;
+    var self = this;
 
-  this.allReviewers = [];
-  function getSelectedOnly(array){
-    return array.filter(function(item){
-      return item.selected;
-    })
-  }
-  this.getSelectedReviewers = function(){
-    return getSelectedOnly(self.allReviewers)
-  }
+    this.allReviewers = [];
+    this.allCities = [];
+
+    function getSelectedOnly(array){
+        return array.filter(function(item){
+            return item.selected;
+        })
+    }
+
+    this.getSelectedReviewers = function(){
+        return getSelectedOnly(self.allReviewers)
+    }
+
+    this.getSelectedCities = function(){
+        return getSelectedOnly(self.allCities)
+    }
+
+
 })
