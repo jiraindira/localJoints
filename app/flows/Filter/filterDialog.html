@@ -25,10 +25,13 @@
     <div>
         <h5 class="reduceMargin">Reviewer</h5>
         <div layout="row" layout-wrap>
-            <div ng-repeat="reviewer in reviewers">
-                <md-checkbox ng-checked="exists(reviewer, selectedReviewer)" ng-click="toggle(reviewer, selectedReviewer)">
-                    {{ reviewer }}
+            <div ng-repeat="reviewer in filterService.allReviewers">
+                <md-checkbox ng-model="reviewer.selected">
+                    {{reviewer.name}}
                 </md-checkbox>
+                <!--<md-checkbox ng-checked="exists(reviewer, filterService.selectedReviewers)" ng-click="toggle(reviewer, selectedReviewer)">-->
+                    <!--{{ reviewer }}-->
+                <!--</md-checkbox>-->
             </div>
         </div>
     </div>

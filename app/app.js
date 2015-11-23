@@ -261,10 +261,11 @@ function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Fireba
 
 };
 
-function FilterDialogController($scope, $mdDialog, Firebase, Scopes ) {
+function FilterDialogController($scope, $mdDialog, Firebase, Scopes, filterService ) {
 
   Scopes.store('FilterDialogController', $scope);
 
+  $scope.filterService = filterService;
   $scope.selectedPrice = [];
   $scope.selectedCity = [];
   $scope.selectedReviewer = [];
@@ -283,42 +284,56 @@ function FilterDialogController($scope, $mdDialog, Firebase, Scopes ) {
     }
   ];
 
-  var firebaseObj = new Firebase('https://dazzling-heat-4525.firebaseio.com//restaurant');
-  firebaseObj.once('value', function(dataSnapshot) {
-    //GET DATA
-    var data = dataSnapshot.val();
-    var restaurants = getArrayFromObject(data);
+  if (!filterService.allReviewers.length) {
 
-    // store data in a $scope
-    $scope.RestaurantData = restaurants;
 
-    if (!restaurants.length) return;
+    var firebaseObj = new Firebase('https://dazzling-heat-4525.firebaseio.com//restaurant');
+    firebaseObj.once('value', function (dataSnapshot) {
+      //GET DATA
+      var data = dataSnapshot.val();
+      var restaurants = getArrayFromObject(data);
 
-    // Retrieve list of locations
-    var locations = [];
-    restaurants.forEach(function (restaurant) {
-      var temp = restaurant.location;
-      if (notInArray(temp,locations)){
-        locations.push(temp);
-      }
-    });
-    $scope.cities = locations;
+      // store data in a $scope
+      $scope.RestaurantData = restaurants;
 
-    // Retrieve list of reviewers
-    var users = [];
-    var tempReviews = [];
-    restaurants.forEach(function (restaurant) {
-      var tempReviews = getArrayFromObject(restaurant.reviews);
-      tempReviews.forEach(function(tempReview) {
-        var temp = tempReview.reviewer;
-        if (notInArray(temp,users)){
-          users.push(temp);
+      if (!restaurants.length) return;
+
+      // Retrieve list of locations
+      var locations = [];
+      restaurants.forEach(function (restaurant) {
+        var temp = restaurant.location;
+        if (notInArray(temp, locations)) {
+          locations.push(temp);
         }
-      })
-    });
-    $scope.reviewers = users;
+      });
+      $scope.cities = locations;
 
-  });
+      // Retrieve list of reviewers
+      //var users = [];
+      //var tempReviews = [];
+
+      var allReviewers = [];
+      restaurants.forEach(function (restaurant) {
+        var reviews = getArrayFromObject(restaurant.reviews);
+        reviews.forEach(function (review) {
+          allReviewers.push(review.reviewer);
+          //if (notInArray(temp,users)){
+          //  users.push(temp);
+          //}
+        });
+      });
+
+      allReviewers = _.unique(allReviewers).map(function (reviewer) {
+        return {
+          name: reviewer
+        }
+      });
+
+      filterService.allReviewers = allReviewers;
+      //$scope.reviewers = users;
+
+    });
+  }
 
   function notInArray(value, array) {
     return array.indexOf(value) == -1;
@@ -411,14 +426,21 @@ app.config(function($mdThemingProvider) {
       .primaryPalette('grey')
 });
 
-app.filter('myFilter',function(Scopes){
+app.filter('myFilter',function(Scopes,filterService){
   return function(input){
-    if (angular.isUndefined(input)) return;
+    //if (angular.isUndefined(input)) return;
+    if (!angular.isArray(input)) return;
+    var reviewers = filterService.getSelectedReviewers();
 
-    var reviewers = Scopes.get("FilterDialogController").selectedReviewer;
+    //var data = Scopes.get("FilterDialogController")
+
+    //if (!data) return;
+
+    //var reviewers = data.selectedReviewer;
+
+    //filterService.getSelectedReviewers
     //console.log(reviewers);
     //var selectedCities = $scope.selectedCity;
-
 
 
    // var reviewers = ["Jirain","Dahlia Bock"];
@@ -429,6 +451,7 @@ app.filter('myFilter',function(Scopes){
 
     if(reviewers.length>0){
       //apply reviewer filter on data
+
       tempOutput = filterReviewer(tempOutput,reviewers);
     }
 
@@ -447,19 +470,15 @@ app.filter('myFilter',function(Scopes){
       return array;
     }
 
-    function filterReviewer(arrRestaurants,arrReviewers ) {
-      var arrPlaces = [];
-
-      arrRestaurants.forEach(function (arrRestaurant) {
-        var tempReviews = getArrayFromObject(arrRestaurant.reviews);
-        tempReviews.forEach(function(tempReview) {
-          var temp = tempReview.reviewer;
-          if (InArray(temp,arrReviewers)){
-            arrPlaces.push(arrRestaurant);
-          }
+    function filterReviewer(allRestaurants, selectedReviewers) {
+      // Get restaurants that are reviewed by the selected reviewers
+      return allRestaurants.filter(function (restaurant) {
+        //return true
+        var reviews = getArrayFromObject(restaurant.reviews);
+        return reviews.some(function(review) {
+          return _.find(selectedReviewers, {name: review.reviewer});
         })
       });
-      return arrPlaces;
     }
 
     function filterBasic(arrRestaurants,arrFilterList ) {
@@ -503,3 +522,17 @@ app.factory('Scopes', function ($rootScope) {
     }
   };
 });
+
+app.service('filterService',function(){
+  var self = this;
+
+  this.allReviewers = [];
+  function getSelectedOnly(array){
+    return array.filter(function(item){
+      return item.selected;
+    })
+  }
+  this.getSelectedReviewers = function(){
+    return getSelectedOnly(self.allReviewers)
+  }
+})
