@@ -111,10 +111,10 @@ app.controller('AppCtrl', ['$scope', 'placesExplorerService','$firebase', '$mdBo
 }]);
 
 function AddDialogController($scope, $mdDialog, $q,placesExplorerService, Firebase ) {
-  var vm = this;
+  var self = this;
 
   self.hide = hide;
-    vm.cancel = cancel;
+    self.cancel = cancel;
   self.answer = answer;
   self.querySearch = querySearch;
 
